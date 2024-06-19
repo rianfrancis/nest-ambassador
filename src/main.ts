@@ -12,6 +12,7 @@ async function bootstrap() {
       'http://localhost:4300',
       'http://localhost:5000',
     ],
+    credentials: true,
   });
   await app.listen(3000);
 }
