@@ -7,7 +7,7 @@ export abstract class AbstractService {
   async save(options) {
     return this.repository.save(options);
   }
-  async find(options) {
+  async find(options: {} = {}) {
     return this.repository.find(options);
   }
   async findOne(options) {
