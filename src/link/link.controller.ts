@@ -6,6 +6,9 @@ export class LinkController {
   constructor(private linkservice: LinkService) {}
   @Get('admin/users/:id/links')
   async all(@Param('id') id: number) {
-    return this.linkservice.find({ where: { user: { id } } });
+    return this.linkservice.find({
+      where: { user: { id } },
+      relations: ['orders'],
+    });
   }
 }
