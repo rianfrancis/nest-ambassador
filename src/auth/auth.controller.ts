@@ -50,10 +50,12 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @Req() request: Request,
   ) {
-    const user = await this.userService.findOne({ where: { email } });
+    const user = await this.userService.findOne({ email });
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
     if (!(await bcrypt.compare(password, user.password))) {
       throw new BadRequestException('Invalid credentials');
     }
@@ -70,11 +72,12 @@ export class AuthController {
     });
 
     response.cookie('jwt', jwt, { httpOnly: true });
+
     return {
       message: 'success',
     };
   }
-  @UseInterceptors(ClassSerializerInterceptor)
+
   @UseGuards(AuthGuard)
   @Get(['admin/user', 'ambassador/user'])
   async user(@Req() request: Request) {
@@ -82,7 +85,21 @@ export class AuthController {
 
     const { id } = await this.jwtService.verifyAsync(cookie);
 
-    return this.userService.findOne({ where: { id } });
+    if (request.path === '/api/admin/user') {
+      return this.userService.findOne({ where: { id } });
+    }
+
+    const user = await this.userService.findOne({
+      where: { id },
+      relations: ['orders', 'orders.order_items'],
+    });
+
+    const { orders, password, ...data } = user;
+
+    return {
+      ...data,
+      revenue: user.revenue,
+    };
   }
 
   @Post(['admin/logout', 'ambassador/logout'])
