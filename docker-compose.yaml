@@ -16,3 +16,8 @@ services:
       - MYSQL_USER=root_nestjs
       - MYSQL_PASSWORD=password
       - MYSQL_TCP_PORT=3306
+
+  redis:
+    image: redis
+    ports:
+      - '6379:6379'
