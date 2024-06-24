@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -21,6 +22,8 @@ import {
 } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Request } from 'express';
+import { Product } from './product';
 
 @Controller()
 export class ProductController {
@@ -73,13 +76,19 @@ export class ProductController {
   }
 
   @Get('ambassador/products/backend')
-  async backend() {
-    let products = await this.cacheManager.get('products_backend');
+  async backend(@Req() request: Request) {
+    let products = await this.cacheManager.get<Product[]>('products_backend');
     if (!products) {
       products = await this.productService.find();
 
       await this.cacheManager.set('products_backend', products, 1800);
     }
+
+    if (request.query.s) {
+      const s = request.query.s.toString().toLowerCase();
+      products = products.filter((p) => p.title.toLowerCase().indexOf(s) >= 0);
+    }
+
     return products;
   }
 }
