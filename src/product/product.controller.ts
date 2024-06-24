@@ -89,6 +89,18 @@ export class ProductController {
       products = products.filter((p) => p.title.toLowerCase().indexOf(s) >= 0);
     }
 
+    if (request.query.sort === 'asc' || request.query.sort === 'desc') {
+      products.sort((a, b) => {
+        const diff = a.price - b.price;
+
+        if (diff === 0) return 0;
+
+        const sign = Math.abs(diff) / diff; //-1 , 1
+
+        return request.query.sort === 'asc' ? sign : -sign;
+      });
+    }
+
     return products;
   }
 }
