@@ -11,6 +11,7 @@ import { ProductModule } from 'src/product/product.module';
 import { StripeModule } from 'nestjs-stripe';
 import { ConfigService } from '@nestjs/config';
 import { OrderListener } from './listeners/order.listener';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -24,6 +25,15 @@ import { OrderListener } from './listeners/order.listener';
         apiKey: configService.get('STRIPE_KEY'),
         apiVersion: '2020-08-27',
       }),
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: 'localhost',
+        port: 1025,
+      },
+      defaults: {
+        from: 'no-reply@example.com',
+      },
     }),
   ],
   controllers: [OrderController],
