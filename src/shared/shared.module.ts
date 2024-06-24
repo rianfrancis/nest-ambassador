@@ -7,7 +7,7 @@ import * as redisStore from 'cache-manager-redis-store';
   imports: [
     JwtModule.register({ secret: 'secret', signOptions: { expiresIn: '1d' } }),
     CacheModule.register({
-      store: redisStore,
+      store: redisStore as any, // added as any to avoid error
       hostL: 'redis',
       port: 6379,
     }),
