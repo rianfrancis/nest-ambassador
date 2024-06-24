@@ -2,6 +2,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Res,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,16 +27,26 @@ export class UserController {
     return this.userService.find({ where: { is_ambassador: true } });
   }
 
-  // @Get('ambassadors/rankings')
-  // async rankings(@Res() response: Response) {
-  //   const client = this.redisService.getClient();
+  // @Get('ambassador/rankings')
+  //   async rankings(
+  //       @Res() response: Response
+  //   ) {
+  //       const client = this.redisService.getClient();
 
-  //   client.zrevrangebyscore(
-  //     'rankings',
-  //     '+inf',
-  //     '-inf',
-  //     'withscores',
-  //     (error, result) => {},
-  //   );
-  // }
+  //       client.zrevrangebyscore('rankings', '+inf', '-inf', 'withscores', (err, result) => {
+  //           let score;
+
+  //           response.send(result.reduce((o, r) => {
+  //               if (isNaN(parseInt(r))) {
+  //                   return {
+  //                       ...o,
+  //                       [r]: score
+  //                   }
+  //               } else {
+  //                   score = parseInt(r);
+  //                   return o;
+  //               }
+  //           }, {}));
+  //       });
+  //   }
 }
