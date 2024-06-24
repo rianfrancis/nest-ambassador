@@ -2,6 +2,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import * as redisStore from 'cache-manager-redis-store';
+import { RedisService } from './redis.service';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import * as redisStore from 'cache-manager-redis-store';
       port: 6379,
     }),
   ],
-  exports: [JwtModule, CacheModule],
+  providers: [RedisService],
+  exports: [JwtModule, CacheModule, RedisService],
 })
 export class SharedModule {}

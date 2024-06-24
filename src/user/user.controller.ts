@@ -8,12 +8,17 @@ import {
 import { UserService } from './user.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { User } from './user';
+import { RedisService } from 'src/shared/redis.service';
+import { Response } from 'express';
 
 @UseGuards(AuthGuard)
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly: RedisService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @Get('admin/ambassadors')
@@ -21,18 +26,16 @@ export class UserController {
     return this.userService.find({ where: { is_ambassador: true } });
   }
 
-  @Get('ambassadors/rankings')
-  async rankings() {
-    const ambassadors: User[] = await this.userService.find({
-      where: { is_ambassador: true },
-      relations: ['orders', 'orders.order_items'],
-    });
+  // @Get('ambassadors/rankings')
+  // async rankings(@Res() response: Response) {
+  //   const client = this.redisService.getClient();
 
-    return (await ambassadors).map((ambassador) => {
-      return {
-        name: ambassador.name,
-        revenue: ambassador.revenue,
-      };
-    });
-  }
+  //   client.zrevrangebyscore(
+  //     'rankings',
+  //     '+inf',
+  //     '-inf',
+  //     'withscores',
+  //     (error, result) => {},
+  //   );
+  // }
 }
