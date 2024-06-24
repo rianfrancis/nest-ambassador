@@ -4,6 +4,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  NotFoundException,
   Post,
   UseGuards,
   UseInterceptors,
@@ -21,6 +22,7 @@ import { OrderItemService } from './order-item.service';
 import { Connection } from 'typeorm';
 import { InjectStripe } from 'nestjs-stripe';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 // import Stripe from 'stripe';
 
 @Controller()
@@ -33,6 +35,7 @@ export class OrderController {
     private connection: Connection,
     @InjectStripe() private readonly stripeClient: any,
     private configService: ConfigService,
+    private eventEmitter: EventEmitter2,
   ) {}
   @UseGuards(AuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
@@ -114,5 +117,23 @@ export class OrderController {
     } finally {
       await queryRunner.release();
     }
+  }
+  @Post('checkout/orders/confirm')
+  async confirm(@Body('source') source: String) {
+    const order = await this.orderService.findOne({
+      where: { transaction_id: source },
+      relations: ['order-items'],
+    });
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    await this.orderService.update(order.id, { complete: true });
+
+    await this.eventEmitter.emit('order.completed', order);
+
+    return {
+      messagE: 'success',
+    };
   }
 }
