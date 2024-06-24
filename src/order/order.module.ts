@@ -8,6 +8,7 @@ import { OrderItemService } from './order-item.service';
 import { SharedModule } from 'src/shared/shared.module';
 import { LinkModule } from 'src/link/link.module';
 import { ProductModule } from 'src/product/product.module';
+import { StripeModule } from 'nestjs-stripe';
 
 @Module({
   imports: [
@@ -15,6 +16,10 @@ import { ProductModule } from 'src/product/product.module';
     SharedModule,
     LinkModule,
     ProductModule,
+    StripeModule.forRoot({
+      apiKey:
+        'sk_test_51PV6Bt2LTLbLjLS6NvbwsnHYTaaoPgxR8G7gXu7v7xuXVtCoDtspjjOUFbAAwkIcHaY8bGmWEbBCD8VYKuY7RyyP00DQn8sEQU',
+    }),
   ],
   controllers: [OrderController],
   providers: [OrderService, OrderItemService],

@@ -19,6 +19,8 @@ import { OrderItem } from './order-item';
 import { Product } from 'src/product/product';
 import { OrderItemService } from './order-item.service';
 import { Connection } from 'typeorm';
+import { InjectStripe } from 'nestjs-stripe';
+// import Stripe from 'stripe';
 
 @Controller()
 export class OrderController {
@@ -28,6 +30,7 @@ export class OrderController {
     private productService: ProductService,
     private orderItemService: OrderItemService,
     private connection: Connection,
+    @InjectStripe() private readonly stripeClient: any,
   ) {}
   @UseGuards(AuthGuard)
   @UseInterceptors(ClassSerializerInterceptor)
@@ -64,6 +67,8 @@ export class OrderController {
 
       const order = await queryRunner.manager.save(o);
 
+      const line_items = [];
+
       for (let p of body.products) {
         const product: Product = await this.productService.findOne({
           id: p.id,
@@ -77,7 +82,27 @@ export class OrderController {
         orderItem.admin_revenue = 0.9 * product.price * p.quantity;
 
         await queryRunner.manager.save(orderItem);
+
+        line_items.push({
+          name: product.title,
+          desecription: product.description,
+          images: [product.image],
+          amount: 100 * product.price,
+          currency: 'usd',
+          quantity: p.quantity,
+        });
       }
+
+      const source = await this.stripeClient.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items,
+        success_url:
+          'http://localhost:5000/success?source={CHECKOUT_SESSION_ID}',
+        cancel_url: 'http://localhost:5000/error',
+      });
+
+      order.transaction_id = source['id'];
+      await queryRunner.manager.save(order);
 
       await queryRunner.commitTransaction();
 
